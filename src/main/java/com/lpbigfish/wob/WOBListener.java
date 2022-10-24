@@ -3,12 +3,11 @@ package com.lpbigfish.wob;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -63,6 +62,47 @@ public class WOBListener implements Listener {
     @EventHandler
     public void onPlayerCloseInventory(InventoryCloseEvent event) {
         if (event.getPlayer().getInventory().contains(TheItem)) {
+            event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryMove(InventoryMoveItemEvent event) {
+        if (event.getItem().isSimilar(TheItem)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerKill(PlayerDeathEvent event) {
+        if (event.getEntity().getInventory().contains(TheItem)) {
+            event.getEntity().getInventory().remove(TheItem);
+        }
+    }
+    @EventHandler
+    public void onLecternClick(PlayerInteractEvent event) {
+        if (event.getItem().isSimilar(TheItem) && event.getClickedBlock().getType().equals(Material.getMaterial("LECTERN"))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEntityEvent event) {
+        if (event.getPlayer().getInventory().getItemInHand().isSimilar(TheItem)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInteractAt(PlayerInteractAtEntityEvent event) {
+        if (event.getPlayer().getInventory().getItemInHand().isSimilar(TheItem)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public  void onRespawn(PlayerRespawnEvent event) {
+        if (!event.getPlayer().getInventory().contains(TheItem)) {
             event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
         }
     }
