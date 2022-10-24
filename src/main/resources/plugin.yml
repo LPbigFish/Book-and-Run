@@ -1,0 +1,6 @@
+name: BookInInventory
+version: '${project.version}'
+main: com.lpbigfish.wob.WOB
+load: STARTUP
+authors: [ LPbigFish ]
+description: puts a book into the 9th slot and runs a command

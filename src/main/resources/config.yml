@@ -1,0 +1,9 @@
+Slot: 8
+Material: BOOK
+DisplayName: '§6Profile'
+Lore:
+- '§7Click to open the §b§lShop'
+- '§7Click to open the §b§lShop'
+- '§7Click to open the §b§lShop'
+CommandOnClick:
+  - 'profile'
