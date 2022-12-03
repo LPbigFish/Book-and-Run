@@ -79,23 +79,17 @@ public class WOBListener implements Listener {
             event.getEntity().getInventory().remove(TheItem);
         }
     }
-    @EventHandler
-    public void onLecternClick(PlayerInteractEvent event) {
-        if (event.getItem().isSimilar(TheItem) && event.getClickedBlock().getType().equals(Material.getMaterial("LECTERN"))) {
-            event.setCancelled(true);
-        }
-    }
 
     @EventHandler
     public void onInteract(PlayerInteractEntityEvent event) {
-        if (event.getPlayer().getInventory().getItemInHand().isSimilar(TheItem)) {
+        if (event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInteractAt(PlayerInteractAtEntityEvent event) {
-        if (event.getPlayer().getInventory().getItemInHand().isSimilar(TheItem)) {
+        if (event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
