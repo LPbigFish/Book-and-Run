@@ -3,6 +3,8 @@ package com.lpbigfish.wob;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -12,6 +14,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Objects;
+
 public class WOBListener implements Listener {
     private final WOB plugin;
 
@@ -19,8 +23,9 @@ public class WOBListener implements Listener {
 
     public WOBListener(WOB plugin) {
         this.plugin = plugin;
-        TheItem = new ItemStack(Material.getMaterial(plugin.getConfig().getString("Material")));
+        TheItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(plugin.getConfig().getString("Material")))));
         ItemMeta meta = TheItem.getItemMeta();
+        assert meta != null;
         meta.setDisplayName(plugin.getConfig().getString("DisplayName"));
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.setLore(plugin.getConfig().getStringList("Lore").subList(0, 3));
@@ -41,7 +46,7 @@ public class WOBListener implements Listener {
 
     @EventHandler
     public void onPlayerClick(PlayerInteractEvent event) {
-        if (event.getItem().isSimilar(TheItem)) {
+        if (Objects.requireNonNull(event.getItem()).isSimilar(TheItem)) {
             event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(0));
             event.setCancelled(true);
         }
@@ -54,7 +59,7 @@ public class WOBListener implements Listener {
 
     @EventHandler
     public void onPlayerClickInventory(InventoryClickEvent event) {
-        if (event.getCurrentItem().isSimilar(TheItem)) {
+        if (Objects.requireNonNull(event.getCurrentItem()).isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
@@ -98,6 +103,21 @@ public class WOBListener implements Listener {
     public  void onRespawn(PlayerRespawnEvent event) {
         if (!event.getPlayer().getInventory().contains(TheItem)) {
             event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerPickup(EntityPickupItemEvent event) {
+        if (event.getItem().getItemStack().isSimilar(TheItem)) {
+            event.setCancelled(true);
+        }
+    }
+
+    //call when an item is found on a ground
+    @EventHandler
+    public void onItemSpawn(ItemSpawnEvent event) {
+        if (event.getEntity().getItemStack().isSimilar(TheItem)) {
+            event.setCancelled(true);
         }
     }
 }
