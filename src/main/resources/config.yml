@@ -7,3 +7,8 @@ Lore:
 - '§7Click to open the §b§lShop'
 CommandOnClick:
   - 'profile'
+Exclude:
+  - 'Lukeo135'
+Worlds:
+  - 'world_nether'
+Sound: BLOCK_CHAIN_PLACE

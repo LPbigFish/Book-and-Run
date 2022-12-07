@@ -1,6 +1,7 @@
 package com.lpbigfish.wob;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -21,6 +22,16 @@ public class WOBListener implements Listener {
 
     private static ItemStack TheItem;
 
+    public boolean isWhiteListed(String player) {
+        try {
+            if (plugin.getConfig().getList("Exclude").contains(player)) {
+                return false;
+            }
+        }
+        catch (Exception ignored) {}
+        return true;
+    }
+
     public WOBListener(WOB plugin) {
         this.plugin = plugin;
         TheItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(plugin.getConfig().getString("Material")))));
@@ -28,27 +39,42 @@ public class WOBListener implements Listener {
         assert meta != null;
         meta.setDisplayName(plugin.getConfig().getString("DisplayName"));
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.setLore(plugin.getConfig().getStringList("Lore").subList(0, 3));
+        meta.setLore(plugin.getConfig().getStringList("Lore"));
         TheItem.setItemMeta(meta);
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+              {
+                if (isWhiteListed(player.getName())) {
+                    player.getInventory().remove(TheItem);
+                    player.getInventory().addItem(TheItem);
+                }
+              }
+
+        }
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
+        if (isWhiteListed(event.getPlayer().getName())) {
+            event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
+        }
     }
 
     @EventHandler
     public void onPlayerDrop(PlayerDropItemEvent event) {
-        if (event.getItemDrop().getItemStack().isSimilar(TheItem)) {
+        if (isWhiteListed(event.getPlayer().getName()) && event.getItemDrop().getItemStack().isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onPlayerClick(PlayerInteractEvent event) {
-        if (Objects.requireNonNull(event.getItem()).isSimilar(TheItem)) {
-            event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(0));
-            event.setCancelled(true);
+        try {
+            if (isWhiteListed(event.getPlayer().getName()) && event.getItem() != null && event.getItem().isSimilar(TheItem)) {
+                event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(0));
+                event.getPlayer().playSound(event.getPlayer().getLocation(), Objects.requireNonNull(plugin.getConfig().getString("Sound")), 1, 1);
+                event.setCancelled(true);
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -59,22 +85,31 @@ public class WOBListener implements Listener {
 
     @EventHandler
     public void onPlayerClickInventory(InventoryClickEvent event) {
-        if (Objects.requireNonNull(event.getCurrentItem()).isSimilar(TheItem)) {
-            event.setCancelled(true);
+
+        try {
+            if (isWhiteListed(event.getWhoClicked().getName()) && Objects.requireNonNull(event.getCurrentItem()).isSimilar(TheItem)) {
+                event.setCancelled(true);
+            }
+        } catch (Exception ignored) {
         }
+
+
     }
 
     @EventHandler
     public void onPlayerCloseInventory(InventoryCloseEvent event) {
-        if (event.getPlayer().getInventory().contains(TheItem)) {
+        if (isWhiteListed(event.getPlayer().getName()) && event.getPlayer().getInventory().contains(TheItem)) {
             event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
         }
     }
 
     @EventHandler
     public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (event.getItem().isSimilar(TheItem)) {
-            event.setCancelled(true);
+        try {
+            if (event.getItem().isSimilar(TheItem)) {
+                event.setCancelled(true);
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -87,14 +122,14 @@ public class WOBListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEntityEvent event) {
-        if (event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
+        if (isWhiteListed(event.getPlayer().getName()) && event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInteractAt(PlayerInteractAtEntityEvent event) {
-        if (event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
+        if (isWhiteListed(event.getPlayer().getName()) && event.getPlayer().getInventory().getItemInMainHand().isSimilar(TheItem)) {
             event.setCancelled(true);
         }
     }
@@ -108,9 +143,13 @@ public class WOBListener implements Listener {
 
     @EventHandler
     public void onPlayerPickup(EntityPickupItemEvent event) {
-        if (event.getItem().getItemStack().isSimilar(TheItem)) {
-            event.setCancelled(true);
+        try {
+            if (event.getEntity() instanceof Player && isWhiteListed(((Player) event.getEntity()).getPlayer().getName()) && event.getItem().getItemStack().isSimilar(TheItem)) {
+                event.setCancelled(true);
+            }
+        } catch (Exception ignored) {
         }
+
     }
 
     //call when an item is found on a ground
