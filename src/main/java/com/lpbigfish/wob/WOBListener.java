@@ -1,9 +1,11 @@
 package com.lpbigfish.wob;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -53,6 +55,13 @@ public class WOBListener implements Listener {
     }
 
     @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (isWhiteListed(event.getPlayer().getName()) && event.getItemInHand().isSimilar(TheItem)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isWhiteListed(event.getPlayer().getName())) {
             event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
@@ -70,8 +79,10 @@ public class WOBListener implements Listener {
     public void onPlayerClick(PlayerInteractEvent event) {
         try {
             if (isWhiteListed(event.getPlayer().getName()) && event.getItem() != null && event.getItem().isSimilar(TheItem)) {
-                event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(0));
-                event.getPlayer().playSound(event.getPlayer().getLocation(), Objects.requireNonNull(plugin.getConfig().getString("Sound")), 1, 1);
+                for (int i = 1; i < plugin.getConfig().getStringList("CommandOnClick").size(); i++) {
+                    event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(i));
+                }
+                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.valueOf(plugin.getConfig().getString("Sound")), 1, 1);
                 event.setCancelled(true);
             }
         } catch (Exception ignored) {
