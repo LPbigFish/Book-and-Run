@@ -47,7 +47,7 @@ public class WOBListener implements Listener {
               {
                 if (isWhiteListed(player.getName())) {
                     player.getInventory().remove(TheItem);
-                    player.getInventory().addItem(TheItem);
+                    player.getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
                 }
               }
 
@@ -79,11 +79,11 @@ public class WOBListener implements Listener {
     public void onPlayerClick(PlayerInteractEvent event) {
         try {
             if (isWhiteListed(event.getPlayer().getName()) && event.getItem() != null && event.getItem().isSimilar(TheItem)) {
-                for (int i = 1; i < plugin.getConfig().getStringList("CommandOnClick").size(); i++) {
+                event.setCancelled(true);
+                for (int i = 0; i < plugin.getConfig().getStringList("CommandOnClick").size(); i++) {
                     event.getPlayer().performCommand(plugin.getConfig().getStringList("CommandOnClick").get(i));
                 }
                 event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.valueOf(plugin.getConfig().getString("Sound")), 1, 1);
-                event.setCancelled(true);
             }
         } catch (Exception ignored) {
         }
