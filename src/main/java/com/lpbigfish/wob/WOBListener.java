@@ -9,9 +9,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +49,13 @@ public class WOBListener implements Listener {
                 }
               }
 
+        }
+    }
+
+    private void bugFix(Player player) {
+        if (isWhiteListed(player.getName())) {
+            player.getInventory().remove(TheItem);
+            player.getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
         }
     }
 
@@ -111,6 +116,8 @@ public class WOBListener implements Listener {
     public void onPlayerCloseInventory(InventoryCloseEvent event) {
         if (isWhiteListed(event.getPlayer().getName()) && event.getPlayer().getInventory().contains(TheItem)) {
             event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("Slot"), TheItem);
+            if (event.getInventory().getType().isCreatable())
+                bugFix((Player) event.getPlayer());
         }
     }
 
@@ -168,6 +175,21 @@ public class WOBListener implements Listener {
     public void onItemSpawn(ItemSpawnEvent event) {
         if (event.getEntity().getItemStack().isSimilar(TheItem)) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        if (event.getInventory().getType().isCreatable() && event.getInventory().contains(TheItem)) {
+
+            bugFix((Player) event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getInventory().getType().isCreatable() && event.getInventory().contains(TheItem)) {
+            event.getInventory().remove(TheItem);
         }
     }
 }

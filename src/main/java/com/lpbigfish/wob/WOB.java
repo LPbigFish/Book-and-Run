@@ -9,8 +9,7 @@ public final class WOB extends JavaPlugin {
     public void onEnable() {
 
         getServer().getPluginManager().registerEvents(new WOBListener(this), this);
-        saveDefaultConfig();
-
+        getConfig().options().copyDefaults(true);
 
 
        /* try {
